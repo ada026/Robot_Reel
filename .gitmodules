@@ -1,0 +1,3 @@
+[submodule "superviseur_robot"]
+	path = superviseur_robot
+	url = ./
