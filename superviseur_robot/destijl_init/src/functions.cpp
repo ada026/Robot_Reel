@@ -180,9 +180,20 @@ void f_receiveFromMon(void *arg) {
 }
 
 void f_startCamera(void* arg){
+    int err;
+
+    /* INIT */
+    RT_TASK_INFO info;
+    rt_task_inquire(NULL, &info);
+    printf("Init %s\n", info.name);
+    rt_sem_p(&sem_barrier, TM_INFINITE);
     
+    /// FINIR ICI
 }
 
+void f_stopCamera(void* arg){
+    
+}
 
 void f_openComRobot(void * arg) {
     int err;
