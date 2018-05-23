@@ -38,15 +38,23 @@ extern RT_TASK th_stopCamera:
 extern RT_TASK th_openComRobot;
 extern RT_TASK th_startRobot;
 extern RT_TASK th_move;
+extern RT_TASK th_find_arena;
+extern RT_TASK th_calculPosition;
+extern RT_TASK th_stopRobot;
+extern RT_TASK th_rechargementWatchdog;
+extern RT_TASK th_camera;
+extern RT_TASK th_niveauBatterie;
 
 extern RT_MUTEX mutex_robotStarted;
 extern RT_MUTEX mutex_move;
-extern RT_MUTEX mutex_connection;
+extern RT_MUTEX mutex_connectionOK;
 extern RT_MUTEX mutex_watchdog;
 extern RT_MUTEX mutex_oldArena;
 extern RT_MUTEX mutex_newArena;
 extern RT_MUTEX mutex_findArena;
 extern RT_MUTEX mutex_findPosition;
+extern RT_MUTEX mutex_cmpt;
+extern RT_MUTEX mutex_cameraStarted;
 
 extern RT_SEM sem_barrier;
 extern RT_SEM sem_openComRobot;
@@ -55,6 +63,11 @@ extern RT_SEM sem_startRobot;
 extern RT_SEM sem_nodeDead;
 extern RT_SEM sem_startCamera;
 extern RT_SEM sem_searchArena;
+extern RT_SEM sem_killPeriph;
+extern RT_SEM sem_startCamera;
+extern RT_SEM sem_stopRobot;
+extern RT_SEM sem_moveStart;
+extern RT_SEM 
 
 extern RT_QUEUE q_messageToMon;
 
