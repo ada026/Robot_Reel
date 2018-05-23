@@ -179,6 +179,11 @@ void f_receiveFromMon(void *arg) {
     rt_mutex_release(&mutex_connection);
 }
 
+void f_startCamera(void* arg){
+    
+}
+
+
 void f_openComRobot(void * arg) {
     int err;
 

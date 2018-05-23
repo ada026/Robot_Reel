@@ -33,6 +33,8 @@
 extern RT_TASK th_server;
 extern RT_TASK th_sendToMon;
 extern RT_TASK th_receiveFromMon;
+extern RT_TASK th_startCamera;
+extern RT_TASK th_stopCamera:
 extern RT_TASK th_openComRobot;
 extern RT_TASK th_startRobot;
 extern RT_TASK th_move;
