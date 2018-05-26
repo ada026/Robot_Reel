@@ -37,13 +37,15 @@ extern RT_TASK th_startCamera;
 extern RT_TASK th_stopCamera:
 extern RT_TASK th_openComRobot;
 extern RT_TASK th_startRobot;
-extern RT_TASK th_move;
-extern RT_TASK th_find_arena;
-extern RT_TASK th_calculPosition;
 extern RT_TASK th_stopRobot;
+extern RT_TASK th_move;
+extern RT_TASK th_findArena;
+extern RT_TASK th_calculPosition;
 extern RT_TASK th_rechargementWatchdog;
 extern RT_TASK th_camera;
 extern RT_TASK th_niveauBatterie;
+extern RT_TASK th_sendCommande;
+extern RT_TASK th_ripNodejs;
 
 extern RT_MUTEX mutex_robotStarted;
 extern RT_MUTEX mutex_move;
@@ -55,6 +57,7 @@ extern RT_MUTEX mutex_findArena;
 extern RT_MUTEX mutex_findPosition;
 extern RT_MUTEX mutex_cmpt;
 extern RT_MUTEX mutex_cameraStarted;
+extern RT_MUTEX mutex_img;
 
 extern RT_SEM sem_barrier;
 extern RT_SEM sem_openComRobot;
@@ -62,12 +65,12 @@ extern RT_SEM sem_serverOk;
 extern RT_SEM sem_startRobot;
 extern RT_SEM sem_nodeDead;
 extern RT_SEM sem_startCamera;
+extern RT_SEM sem_stopCamera;
 extern RT_SEM sem_searchArena;
 extern RT_SEM sem_killPeriph;
-extern RT_SEM sem_startCamera;
 extern RT_SEM sem_stopRobot;
 extern RT_SEM sem_moveStart;
-extern RT_SEM 
+extern RT_SEM sem_ordre;
 
 extern RT_QUEUE q_messageToMon;
 
@@ -76,10 +79,11 @@ extern int robotStarted;
 extern char move;
 extern bool connectionOK;
 extern bool watchdog;
-extern bool medhi;
+extern Image* img;
 extern Arene* newArena;
 extern Arene* oldArena;
 extern bool findArena;
+extern bool cameraStarted;
 
 extern int MSG_QUEUE_SIZE;
 
