@@ -58,6 +58,7 @@ extern RT_MUTEX mutex_findPosition;
 extern RT_MUTEX mutex_cmpt;
 extern RT_MUTEX mutex_cameraStarted;
 extern RT_MUTEX mutex_img;
+extern RT_MUTEX mutex_cmpt;
 
 extern RT_SEM sem_barrier;
 extern RT_SEM sem_openComRobot;
@@ -67,7 +68,8 @@ extern RT_SEM sem_nodeDead;
 extern RT_SEM sem_startCamera;
 extern RT_SEM sem_stopCamera;
 extern RT_SEM sem_searchArena;
-extern RT_SEM sem_killPeriph;
+extern RT_SEM sem_killRobot;
+extern RT_SEM sem_killCamera;
 extern RT_SEM sem_stopRobot;
 extern RT_SEM sem_moveStart;
 extern RT_SEM sem_ordre;
@@ -84,6 +86,7 @@ extern Arene* newArena;
 extern Arene* oldArena;
 extern bool findArena;
 extern bool cameraStarted;
+extern int cmpt;
 
 extern int MSG_QUEUE_SIZE;
 

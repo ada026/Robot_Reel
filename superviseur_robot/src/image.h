@@ -49,7 +49,7 @@ struct Position {
 
 /**
  * \brief      Ouvre une camera.
- * \details    Met à jour le descripteur de fichier passé en paramètre pour correspondre à la camera ouverte
+ * \details    Met à jour le descripteur de fichierp assé en paramètre pour correspondre à la camera ouverte
  *             
  * \param    *Camera      	Pointeur d'un file descriptor d'une camera ouverte
  * \return retourne 0 si la camera a été ouverte correctement et -1 si une erreur survient.

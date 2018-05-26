@@ -229,6 +229,7 @@ void f_stopCamera(void* arg){
     printf("%s : waiting for sem_startCamera\n", info.name);
 #endif
     rt_sem_p(&sem_stopCamera, TM_INFINITE);
+    rt_sem_p(&sem_killCamera, TM_INFINITE);
     do {
         err = stop_camera(cam);
         if(err != -1){
@@ -328,7 +329,7 @@ void f_stopRobot(void *arg){
         printf("%s : Wait sem_stopRobot\n", info.name);
 #endif
         rt_sem_p(&sem_stopRobot, TM_INFINITE);
-        rt_sem_p(&sem_killPeriph, TM_INFINITE);
+        rt_sem_p(&sem_killRobot, TM_INFINITE);
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
         if(robotStarted){
             rt_mutex_release(&mutex_robotStarted);
@@ -342,7 +343,6 @@ void f_stopRobot(void *arg){
 
 void f_move(void *arg) {
     int err;
-    int cmpt = 0;
     /* INIT */
     RT_TASK_INFO info;
     rt_task_inquire(NULL, &info);
@@ -369,6 +369,7 @@ void f_move(void *arg) {
             err = send_command_to_robot(move);
             rt_mutex_release(&mutex_move);
             
+            rt_mutex_acquire(&mutex_cmpt, TM_INFINITE);
             if(err < 0){
                 cmpt++;
                 if(cmpt == 3){
@@ -378,6 +379,7 @@ void f_move(void *arg) {
             else{
                 cmpt = 0;
             }
+            rt_mutex_release(&mutex_cmpt);
 #ifdef _WITH_TRACE_
             printf("%s: the movement %c was sent\n", info.name, move);
 #endif            
@@ -416,6 +418,17 @@ void f_niveauBatterie(void *arg){
            // FINIR EDITER CEST FAUX
             err = send_command_to_robot(DMB_GET_VBAT);
             //FINIR EDITER EST FAUX
+            rt_mutex_acquire(&mutex_cmpt, TM_INFINITE);
+            if(levelBatterie ?? < 0 || err < 0){
+                cmpt++;
+                if(cmpt == 3)
+                    rt_sem_v(&sem_stopRobot, TM_INFINITE);
+            }
+            else{
+                cmpt = 0;
+                send_message_to_monitor(BAT, char* levelBatterie);
+            }
+            rt_mutex_release(&mutex_cmpt);
         }
         rt_mutex_release(&mutex_robotStarted);
 }
@@ -434,7 +447,20 @@ void f_sendCommande(void *arg){
 #endif
     rt_sem_p(&sem_ordre, TM_INFINITE);
     //FINIR CA MEC
-    //send_command_to_robot();
+    //send_command_to_robot(ordre);
+    //recevoir_reponse;
+    
+    rt_mutex_acquire(&mutex_cmpt, TM_INFINITE);
+    if(reponse == error){
+        cmpt = 0;
+    }
+    else{
+        cmpt++;
+        if(cmpt == 3)
+            rt_sem_v(&sem_stopRobot, TM_INFINITE);
+    }
+    rt_mutex_release(&mutex_cmpt);
+    //envoyer réponsé;
 }
 
 void f_findArena(void *arg){
@@ -518,8 +544,47 @@ void f_calculPosition(void *arg){
 }
 
 void f_rechargementWatchdog(void *arg){
+    int err;
+    int compteur;
     
+    /* INIT */
+    RT_TASK_INFO info;
+    rt_task_inquire(NULL, &info);
+    printf("Init rechargementWatchdog%s\n", info.name);
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+
+    /* PERIODIC START */
+#ifdef _WITH_TRACE_
+    printf("%s: start period\n", info.name);
+#endif
+    rt_task_set_periodic(NULL, TM_NOW, 1000000000);
+    compteur = 0;
+    while (1) {
+#ifdef _WITH_TRACE_
+        printf("%s: Wait period \n", info.name);
+#endif
+        rt_task_wait_period(NULL);
+#ifdef _WITH_TRACE_
+        printf("%s: Periodic activation\n", info.name);
+        printf("%s: niveauBatterie equals %c\n", info.name, move);
+#endif
+        
+       rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
+       rt_mutex_acquire(&mutex_watchdog, TM_INFINITE);
+       while(robotStarted && watchdog){
+           send_command_to_robot(DMB_RELOAD_WD);
+           err = (&sem_ordre, TM_INFINITE);
+           if(err == ROBOT_ERROR || err == ROBOT_TIMED_OUT){
+               compteur++;
+               if(compteur == 3)
+                   rt_sem_v(&sem_stopRobot, TM_INFINITE);
+           }
+           else{
+               compteur--;
+           }
+       }
 }
+
 //Mmmmmh
 void f_ripNodejs(void *arg){
     int err;
@@ -535,8 +600,8 @@ void f_ripNodejs(void *arg){
     rt_sem_p(&sem_nodeDead, TM_INFINITE);
     rt_mutex_acquire(&mutex_connectionOK, TM_INFINITE);
     if(!conectionOK){
-        rt_sem_v(&sem_killPeriph, TM_INFINITE);//Mmmmmh 
-        rt_sem_v(&sem_killPeriph, TM_INFINITE);//Mmmmmmh
+        rt_sem_v(&sem_killRobot, TM_INFINITE);//Mmmmmh 
+        rt_sem_v(&sem_killCamera, TM_INFINITE);//Mmmmmmh
     }
     rt_mutex_release(&mutex_connectionOK);
 }
