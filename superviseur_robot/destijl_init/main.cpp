@@ -23,7 +23,7 @@ RT_TASK th_server;
 RT_TASK th_sendToMon;
 RT_TASK th_receiveFromMon;
 RT_TASK th_startCamera;
-RT_TASK th_stopCamera:
+RT_TASK th_stopCamera;
 RT_TASK th_openComRobot;
 RT_TASK th_startRobot;
 RT_TASK th_stopRobot;

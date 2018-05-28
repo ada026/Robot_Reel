@@ -388,9 +388,9 @@ void f_move(void *arg) {
     }
 }
 
-//FINIR EDITER EST FAUX
+
 void f_niveauBatterie(void *arg){
-    int err;
+    int levelBatterie;
 
     /* INIT */
     RT_TASK_INFO info;
@@ -415,54 +415,24 @@ void f_niveauBatterie(void *arg){
 #endif
         rt_mutex_acquire(&mutex_robotStarted, TM_INFINITE);
         if (robotStarted) {
-           // FINIR EDITER CEST FAUX
-            err = send_command_to_robot(DMB_GET_VBAT);
-            //FINIR EDITER EST FAUX
+            rt_mutex_release(&mutex_robotStarted)
+            levelBatterie = send_command_to_robot(DMB_GET_VBAT);
             rt_mutex_acquire(&mutex_cmpt, TM_INFINITE);
-            if(levelBatterie ?? < 0 || err < 0){
+            if(levelBatterie < 0){
                 cmpt++;
                 if(cmpt == 3)
                     rt_sem_v(&sem_stopRobot, TM_INFINITE);
             }
             else{
                 cmpt = 0;
-                send_message_to_monitor(BAT, char* levelBatterie);
+                send_message_to_monitor(HEADER_STM_BAT, (void *) &levelBatterie);
             }
             rt_mutex_release(&mutex_cmpt);
         }
         rt_mutex_release(&mutex_robotStarted);
+    }
 }
     
-//FINIR CA MEC
-void f_sendCommande(void *arg){
-    int err;
-    /* INIT */
-    RT_TASK_INFO info;
-    rt_task_inquire(NULL, &info);
-    printf("Init sendCommande%s\n", info.name);
-    rt_sem_p(&sem_barrier, TM_INFINITE);
-        
-#ifdef _WITH_TRACE_
-    printf("%s : waiting for sem_ordre\n", info.name);
-#endif
-    rt_sem_p(&sem_ordre, TM_INFINITE);
-    //FINIR CA MEC
-    //send_command_to_robot(ordre);
-    //recevoir_reponse;
-    
-    rt_mutex_acquire(&mutex_cmpt, TM_INFINITE);
-    if(reponse == error){
-        cmpt = 0;
-    }
-    else{
-        cmpt++;
-        if(cmpt == 3)
-            rt_sem_v(&sem_stopRobot, TM_INFINITE);
-    }
-    rt_mutex_release(&mutex_cmpt);
-    //envoyer réponsé;
-}
-
 void f_findArena(void *arg){
     int err;
     /* INIT */
@@ -470,29 +440,24 @@ void f_findArena(void *arg){
     rt_task_inquire(NULL, &info);
     printf("Init sendCommande%s\n", info.name);
     rt_sem_p(&sem_barrier, TM_INFINITE);
-        
+    while(1){    
 #ifdef _WITH_TRACE_
     printf("%s : waiting for sem_searchArena\n", info.name);
 #endif
-    rt_sem_p(&sem_searchArena, TM_INFINITE);
-    rt_mutex_acquire(&mutex_newArena, TM_INFINITE);
-    rt_mutex_acquire(&mutex_oldArena, TM_INFINITE);
-    rt_mutex_acquire(&mutex_img, TM_INFINITE);
-    oldArena = newArena;
-    rt_mutex_release(&mutex_oldArena);
-    
-    err = detect_arena(img,newArena); // Doit-on gérer l'erreur ?
-    draw_arena(img, img, newArena);
-    
-    rt_mutex_release(&mutex_img);
-    rt_mutex_release(&mutex_newArena);
-    
-    send_message_to_monitor(IMG,img);
+        rt_sem_p(&sem_searchArena, TM_INFINITE);
+        rt_mutex_acquire(&mutex_img, TM_INFINITE);
+        rt_mutex_acquire(&mutex_newArena),
+
+        err = detect_arena(img,newArena); 
+        draw_arena(img, img, newArena);
+
+        send_message_to_monitor(HEADER_STM_IMAGE,img);
+        rt_mutex_release(&mutex_img);
+    }
 }
-//FINIR
+
 void f_camera(void *arg){
     int err;
-
     /* INIT */
     RT_TASK_INFO info;
     rt_task_inquire(NULL, &info);
@@ -503,7 +468,7 @@ void f_camera(void *arg){
 #ifdef _WITH_TRACE_
     printf("%s: start period\n", info.name);
 #endif
-    rt_task_set_periodic(NULL, TM_NOW, 300000000);
+    rt_task_set_periodic(NULL, TM_NOW, 100000);
     
     while (1) {
 #ifdef _WITH_TRACE_
@@ -512,35 +477,74 @@ void f_camera(void *arg){
         rt_task_wait_period(NULL);
 #ifdef _WITH_TRACE_
         printf("%s: Periodic activation\n", info.name);
-        printf("%s: niveauBatterie equals %c\n", info.name, move);
 #endif
-    rt_mutex_acquire(&mutex_findArena, TM_INFINITE);
-    if(!findArena){
-        rt_mutex_acquire(&mutex_cameraStarted, TM_INFINITE);
-        if(cameraStarted){
-            rt_mutex_acquire(&mutex_img, TM_INFINITE);
-            
-            err = get_image(Camera *camera, Image * monImage, const char *fichier = NULL) // gérer l'erreur
-                                                                // *fichier ???
-            rt_mutex_acquire(&mutex_newArena, TM_INFINITE);
-            rt_mutex_acquire(&mutex_oldArena, TM_INFINITE);
-            oldArena = newArena;
-            rt_mutex_release(&mutex_oldArena);
-            
-            draw_arena(img, img, newArena); 
-            
-            rt_mutex_release(&mutex_img);
-            rt_mutex_release(&mutex_newArena);
-            
-            send_message_to_monitor(IMG,img);
-        }
-        rt_mutex_release(&mutex_cameraStarted);
+        rt_mutex_acquire(&mutex_findArena, TM_INFINITE);
+        if(!findArena){
+            rt_mutex_release(&mutex_findArena);
+            rt_mutex_acquire(&mutex_cameraStarted, TM_INFINITE);
+            if(cameraStarted){
+                rt_mutex_release(&mutex_cameraStarted);
+                rt_mutex_acquire(&mutex_img, TM_INFINITE);
+
+                err = get_image(Camera *camera, Image * img, const char *fichier = flux); 
+                if(!(err < 0) ){
+                    rt_mutex_acquire(&mutex_oldArena, TM_INFINITE);
+                    draw_arena(img, img, oldArena); 
+                    rt_mutex_release(&mutex_oldArena);
+                    send_message_to_monitor(HEADER_STM_IMAGE,img);
+                    rt_mutex_release(&mutex_img);
+                }
+            } else
+                rt_mutex_release(&mutex_cameraStarted);
+        } else
+            rt_mutex_release(&mutex_findArena);
     }
-    rt_mutex_release(&mutex_findArena);
 }
 
 void f_calculPosition(void *arg){
+     int err;
+    /* INIT */
+    RT_TASK_INFO info;
+    rt_task_inquire(NULL, &info);
+    printf("Init calcul position%s\n", info.name);
+    rt_sem_p(&sem_barrier, TM_INFINITE);
+    Robot robot ;
+    Position posTriangle ;
+
+    /* PERIODIC START */
+#ifdef _WITH_TRACE_
+    printf("%s: start period\n", info.name);
+#endif
+    rt_task_set_periodic(NULL, TM_NOW, 100000000);
     
+    while (1) {
+#ifdef _WITH_TRACE_
+        printf("%s: Wait period \n", info.name);
+#endif
+        rt_task_wait_period(NULL);
+#ifdef _WITH_TRACE_
+        printf("%s: Periodic activation\n", info.name);
+#endif
+        rt_mutex_acquire(&mutex_findPosition, TM_INFINITE);
+        if(findPosition){
+            rt_mutex_release(&mutex_findPosition);
+            rt_mutex_acquire(&mutex_cameraStarted, TM_INFINITE);
+            if(cameraStarted){
+                rt_mutex_release(&mutex_cameraStarted);
+                rt_mutex_acquire(&mutex_img, TM_INFINITE);
+                rt_mutex_acquire(&mutex_oldArena);
+                err = detect_position(img,&posTriangle,oldArena);
+                rt_mutex_release(&mutex_oldArena);
+                if(!(err < 0)){
+                    err = draw_position(img,img,&posTriangle);
+                    if (!(err < 0)){
+                        send_message_to_monitor(HEADER_STM_IMAGE,img);
+                        send_message_to_monitor(HEADER_STM_POS,&posTriangle);
+                        rt_mutex_release(&mutex_img);
+                    } else 
+                        rt_mutex_release(&mutex_img);
+                }
+                
 }
 
 void f_rechargementWatchdog(void *arg){
@@ -583,6 +587,7 @@ void f_rechargementWatchdog(void *arg){
                compteur--;
            }
        }
+    }
 }
 
 //Mmmmmh
