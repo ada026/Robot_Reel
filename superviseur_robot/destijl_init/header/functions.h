@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   functions.h
  * Author: pehladik
  *
@@ -25,7 +25,7 @@
 #include <alchemy/sem.h>
 #include <alchemy/queue.h>
 
-#include "../../src/monitor.h"    
+#include "../../src/monitor.h"
 #include "../../src/robot.h"
 #include "../../src/image.h"
 #include "../../src/message.h"
@@ -90,6 +90,14 @@ extern int PRIORITY_TMOVE;
 extern int PRIORITY_TSENDTOMON;
 extern int PRIORITY_TRECEIVEFROMMON;
 extern int PRIORITY_TSTARTROBOT;
+extern int PRIORITY_TSTARTCAMERA;
+extern int PRIORITY_TSTOPCAMERA;
+extern int PRIORITY_TCAMERA;
+extern int PRIORITY_TSTOPROBOT;
+extern int PRIORITY_TBATTERYLEVEL;
+extern int PRIORITY_TFINDARENA;
+extern int PRIORITY_TCOMPUTEPOSITION;
+extern int PRIORITY_TRIPNODEJS;
 
 void f_server(void *arg);
 void f_sendToMon(void *arg);
@@ -107,4 +115,3 @@ void f_computePosition(void *arg);
 void f_ripNodejs(void *arg);
 
 #endif /* FUNCTIONS_H */
-

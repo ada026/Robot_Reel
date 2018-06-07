@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   main.c
  * Author: pehladik
  *
@@ -41,13 +41,13 @@ int PRIORITY_TSENDTOMON = 25;
 int PRIORITY_TRECEIVEFROMMON = 22;
 int PRIORITY_TSTARTROBOT = 20;
 int PRIORITY_TSTARTCAMERA = 20;
-int PRIORITY_STOPCAMERA = 15;
-int PRIORITY_CAMERA = 12;
-int PRIORITY_STOPROBOT = 15;
-int PRIORITY_BATTERYLEVEL = 11;
-int PRIORITY_FINDARENA = 21;
-int PRIORITY_COMPUTEPOSITION = 21;
-int PRIORITY_RIPNODEJS = 5 ;
+int PRIORITY_TSTOPCAMERA = 15;
+int PRIORITY_TCAMERA = 12;
+int PRIORITY_TSTOPROBOT = 15;
+int PRIORITY_TBATTERYLEVEL = 11;
+int PRIORITY_TFINDARENA = 21;
+int PRIORITY_TCOMPUTEPOSITION = 21;
+int PRIORITY_TRIPNODEJS = 5 ;
 
 RT_MUTEX mutex_robotStarted;
 RT_MUTEX mutex_move;
@@ -93,7 +93,7 @@ int cmpt = 0;
 
 /**
  * \fn void initStruct(void)
- * \brief Initialisation des structures de l'application (tâches, mutex, 
+ * \brief Initialisation des structures de l'application (tâches, mutex,
  * semaphore, etc.)
  */
 void initStruct(void);
@@ -171,9 +171,9 @@ void initStruct(void) {
         printf("Error mutex create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    
-    
-    
+
+
+
 
     /* Creation du semaphore */
     if (err = rt_sem_create(&sem_barrier, NULL, 0, S_FIFO)) {
@@ -215,8 +215,8 @@ void initStruct(void) {
     if (err = rt_sem_create(&sem_stopRobot, NULL, 0, S_FIFO)) {
         printf("Error semaphore create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
-    }   
- 
+    }
+
     /* Creation des taches */
     if (err = rt_task_create(&th_server, "th_server", 0, PRIORITY_TSERVER, 0)) {
         printf("Error task create: %s\n", strerror(-err));
@@ -242,35 +242,35 @@ void initStruct(void) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_startCamera, "th_startCamera", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_startCamera, "th_startCamera", 0, PRIORITY_TSTARTCAMERA, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_stopCamera, "th_stopCamera", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_stopCamera, "th_stopCamera", 0, PRIORITY_TSTOPCAMERA, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_stopRobot, "th_stopRobot", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_stopRobot, "th_stopRobot", 0, PRIORITY_TSTOPROBOT, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_camera, "th_camera", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_camera, "th_camera", 0, PRIORITY_TCAMERA, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_findArena, "th_findArena", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_findArena, "th_findArena", 0, PRIORITY_TFINDARENA, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_batteryLevel, "th_batteryLevel", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_batteryLevel, "th_batteryLevel", 0, PRIORITY_TBATTERYLEVEL, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_computePosition, "th_computePosition", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_computePosition, "th_computePosition", 0, PRIORITY_TCOMPUTEPOSITION, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
-    if (err = rt_task_create(&th_ripNodejs, "th_ripNodejs", 0, PRIORITY_TMOVE, 0)) {
+    if (err = rt_task_create(&th_ripNodejs, "th_ripNodejs", 0, PRIORITY_TRIPNODEJS, 0)) {
         printf("Error task create: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
     }
@@ -285,7 +285,7 @@ void initStruct(void) {
 void startTasks() {
 
     int err;
-    
+
     if (err = rt_task_start(&th_startRobot, &f_startRobot, NULL)) {
         printf("Error task start: %s\n", strerror(-err));
         exit(EXIT_FAILURE);
@@ -360,5 +360,5 @@ void deleteTasks() {
     rt_task_delete(&th_findArena);
     rt_task_delete(&th_computePosition);
     rt_task_delete(&th_ripNodejs);
-    
+
 }
